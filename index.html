@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/read-excel-file@4.x/bundle/read-excel-file.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <audio id="heartbeat-sound" src="C:\Users\nashr\Downloads\Brgy\video\heartbeat.mp3" preload="auto"></audio>
+    <title>NamePickerforyoubrgy</title>
+    
+    <style>
+      #countdown {
+  font-size: 3em;
+  width: 100%;
+  text-align: center;
+}
+
+/* Adjust font size for medium screens */
+@media (max-width: 768px) {
+  #countdown {
+    font-size: 2em;
+  }
+}
+
+/* Adjust font size for small screens */
+@media (max-width: 480px) {
+  #countdown {
+    font-size: 1.5em;
+  }
+}
+
+/* Adjust font size for extra small screens */
+@media (max-width: 320px) {
+  #countdown {
+    font-size: 1em;
+  }
+}
+        #countdown {
+  font-size: 5em;
+  font-weight: bold;
+  color: rgb(72, 245, 251);
+  position: fixed;
+  top: 172%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  background-color: rgba(57, 30, 125, 0.526);
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 100px; /* Centers the text vertically */
+  box-shadow: 0 0 10px rgba(11, 84, 162, 0.5);
+}
+
+
+/* Heartbeat effect for the text */
+.heartbeat {
+  animation: heartbeat 0.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2); /* Increase the scale for a more pronounced effect */
+  }
+}
+
+/* Beating effect for the entire screen */
+@keyframes screen-beat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05); /* Adjust the scale for the beating effect */
+  }
+}
+
+.screen-beat {
+  animation: screen-beat 0.5s ease-in-out infinite; /* Adjust duration as needed */
+}
+
+
+      .winner-effect {
+  animation: winner-animation 1s ease-in-out forwards;
+}
+
+@keyframes winner-animation {
+  0% {
+    transform: scale(1);
+    background-color: yellow;
+  }
+  50% {
+    transform: scale(1.1);
+    background-color: gold;
+  }
+  100% {
+    transform: scale(1);
+    background-color: transparent;
+  }
+}
+
+      body {
+        font-family: 'open sans';
+        width: 1300px;
+        height: 400px;
+        background-color: #0f3c57;
+        overflow-y: auto;
+      }
+      section.index {
+        padding: 20px;
+      }
+      .header {
+        font-family: Arial, sans-serif;
+        text-align: left;
+        font-size: 30px;
+        color: #ffffff;
+        margin: 5px;
+        width: 120%;
+        padding: 0;
+        z-index: 1000;
+        text-shadow: 1px 1px 0 #d0d0c4,
+                     -1px -1px 0 rgb(28, 28, 19),
+                     1px -1px 0 rgb(48, 48, 9),
+                     -1px 1px 0 yellow,
+                     1px 0px 0 rgb(20, 20, 2),
+                     -1px 0px 0 rgb(88, 90, 98),
+                     0px 1px 0 rgba(35, 131, 209, 0.945),
+                     0px -1px 0 yellow;
+                     position: relative; /* Enable positioning */
+    left: 50px; /* Move the title 50px from the left */
+      }
+      .subtitle,
+      .province {
+        display: none;
+      }
+      .prize {
+        display: none;
+      }
+      #media-container {
+        width: 100%;
+      }
+      #media-container img {
+        width: 100%;
+        object-fit: cover;
+      }
+      .spinner {
+        color: yellow;
+        display: none;
+        font-weight: 500;
+      }
+      .spinner > div {
+        text-align: center;
+      }
+      .spinner img {
+        max-width: 50px;
+      }
+      #upload-message {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #000;
+        text-align: center;
+        font-size: 30px;
+        z-index: 1;
+      }
+      #upload-message i {
+        font-size: 36px;
+        margin-bottom: 5px;
+        display: block;
+        color: #ff5722;
+        position: relative;
+        top: -70px;
+      }
+      .show {
+        display: flex !important;
+      }
+      #media-display,
+      video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      #name-container {
+  display: grid;
+  position: relative;
+  top: 50px;
+  left: 50px;
+  grid-template-columns: repeat(4, minmax(50px, 100fr)); /* Keep the original format */
+  grid-gap: 15px;
+  max-width: 550px; /* Keep the original width */
+  background-color: transparent;
+  backdrop-filter: blur(5px);
+  border-radius: 5px;
+  overflow: visible; /* Ensure no scrolling */
+  height: auto; /* Allow container to expand based on content */
+  justify-content: center;
+}
+
+      
+      .name {
+        padding: 15px;
+        background-color: #f9f9f9;
+        text-align: center;
+        font-size: 1.5em !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        transition: background-color 0.01s ease;
+        border-radius: 0;
+        clip-path: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.2em;
+      }
+      .name .first-name,
+      .name .last-name {
+        display: block;
+        font-size: 1.2em;
+        margin: 0;
+      }
+      .name.rectangle {
+        font-family: Arial;
+        font-size: 12px;
+        min-height: 70px;
+        font-weight: bold;
+        position: relative;
+        background: #ffc107;
+        float: left;
+        padding: 7px 3px;
+        margin: 0 5px 5px 0;
+      }
+      .pick-button-wrapper {
+  position: relative;
+  left: 650px; 
+  top: 60px;
+      }
+      .name.rectangle:after {
+        content: "";
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        border-right: #e82c32 7px solid;
+        border-bottom: #e82c32 7px solid;
+        border-radius: 0 0 30px 0;
+      }
+      .name.rectangle:before {
+        content: "";
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        right: 0;
+        border-left: #e82c32 7px solid;
+        border-bottom: #e82c32 7px solid;
+        border-radius: 0 0 0 30px;
+      }
+      .name.rectangle :after {
+        content: "";
+        position: absolute;
+        z-index: 100;
+        bottom: 0;
+        left: 0;
+        border-right: #e82c32 7px solid;
+        border-top: #e82c32 7px solid;
+        border-radius: 0 30px 0 0;
+      }
+      .name.rectangle :before {
+        content: "";
+        position: absolute;
+        z-index: 1000;
+        bottom: 0;
+        right: 0;
+        border-left: #e82c32 7px solid;
+        border-top: #e82c32 7px solid;
+        border-radius: 30px 0 0 0;
+      }
+      .name.circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        clip-path: circle(50%);
+      }
+      .name.rounded {
+        border-radius: 15px;
+      }
+      /* Updated smooth bouncing highlight effect */
+      @keyframes highlight-bounce {
+          0% {
+              transform: translate(0, 0) scale(1);
+              background-color: #ffffff;
+          }
+          20% {
+              transform: translate(10px, 0) scale(1.05);
+              background-color: #fff5cc;
+          }
+          40% {
+              transform: translate(0, 0) scale(1);
+              background-color: #ffe680;
+          }
+          60% {
+              transform: translate(-10px, 0) scale(0.98);
+              background-color: #fff5cc;
+          }
+          80% {
+              transform: translate(0, 0) scale(1);
+              background-color: #ffffff;
+          }
+          100% {
+              transform: translate(0, 0) scale(1);
+              background-color: #ffffff;
+          }
+      }
+      .highlight {
+        animation: highlight-bounce 1s ease-in-out infinite;
+      }
+      input[type="number"] {
+        font-size: 1.2em !important;
+        width: 80px !important;
+        height: 30px !important;
+        text-align: center !important;
+        padding: 1px !important;
+      }
+      input[type="file"] {
+        color: yellow;
+      }
+      #header-container {
+        position: absolute;
+        top: 15px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        z-index: 1000;
+      }
+      #edit-title-button {
+        width: 200px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1em;
+      }
+
+      #settings-button {
+        padding: 12px 24px;
+        font-size: 3em;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(135deg, #ff8c00 0%, #ff6347 100%);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        position: absolute;
+        top: 900px;
+        right: 0px;
+        transition: all 0.01s ease;
+        box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+      }
+      /* Updated winner-container to be smaller */
+      #winner-container {
+        padding: 10px 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+        text-align: center;
+        margin-top: 10px; 
+        margin-left: -500px;
+        display: flex;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 300px;
+        min-height: 70px;
+        background-image: url('https://www.seekpng.com/png/full/183-1832991_neon-borders-png-image-transparent-border-rectangle-png.png');
+        background-size: 100% 100%;
+        background-color: white;
+        background-repeat: no-repeat;
+        border-radius: 20px;
+      }
+      #winners-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 40px 0;
+        gap: 20px;
+        justify-content: space-around;
+      }
+      #winners-container h1 {
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 2.2em;
+        color: white;
+      }
+      #winners-container > div > div {
+        text-align: center;
+        padding: 12px 0;
+      }
+      /* Winner text font is made smaller */
+      #winner-text {
+        font-size: 1.2em;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        color: black;
+      }
+      .winner-list li,
+      .invalid-winner-list li {
+        font-size: 15px;
+        color: white;
+        list-style: none;
+        text-transform: capitalize;
+        font-weight: 500;
+      }
+      #settings-button:hover {
+        background: linear-gradient(135deg, #ff6347 0%, #ffb74d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      }
+      #settings-button:active {
+        background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+        transform: translateY(0);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+      }
+      .settings-container {
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        position: absolute;
+        top: 7%;
+        gap: 20px;
+        right: 10px;
+        background-color: #c71621;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 100);
+        z-index: 1000;
+        max-width: 800px;
+        max-height: 420px;
+        box-sizing: border-box;
+        overflow-x: auto;
+      }
+      .settings-container label {
+        margin-bottom: 10px;
+        width: 100%;
+        display: block;
+        text-align: left;
+        color: #fff;
+        font-weight: 500;
+        font-size: 1.2em;
+      }
+      .settings-container textarea,
+      .settings-container input {
+        margin-bottom: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+      select,
+      input,
+      textarea {
+        border: none;
+        display: block;
+        outline: none;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .settings-container textarea {
+        min-height: 120px;
+        font-size: 1.2em;
+      }
+      .settings-container textarea::placeholder {
+        font-size: 1.1em;
+      }
+      .settings-header {
+        font-size: 18px;
+        color: #ffffff;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+      .settings-container select {
+        font-size: 1em;
+      }
+      #pick-button {
+        padding: 10px 20px;
+        font-size: 1em;
+        color: #fff;
+        background: linear-gradient(135deg, #ff6347 0%, #ffb74d 100%);
+        border: none;
+        border-radius: 5px;
+        display: none;
+        cursor: pointer;
+        text-align: center;
+        margin-top: 20px;
+      }
+      #pick-button:hover {
+        background: linear-gradient(135deg, #ff6347 0%, #ffb74d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      }
+      #pick-button:active {
+        background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+        transform: translateY(0);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+      }
+      #pick-button1 {
+        padding: 12px 24px;
+        font-size: 3em;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(135deg, #ff8c00 0%, #ff6347 100%);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.01s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+        margin-bottom: 10px;
+        margin-left: -425px; /* Move the button 20px to the left */
+      }
+      #pick-button1:hover {
+        background: linear-gradient(135deg, #ff6347 0%, #ffb74d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      }
+      #pick-button1:active {
+        background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+        transform: translateY(0);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+      }
+      #add-name-button {
+        padding: 10px 20px;
+        font-size: 1em;
+        color: #fff;
+        background-color: #ffb74d;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      #add-name-button:hover {
+        background-color: #ff6347;
+      }
+      #file-upload-names {
+        display: none;
+      }
+      
+      .winner-list {
+        font-size: 1.3em;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        color: white;
+      }
+      .winner-item {
+        color: white;
+      }
+      .button-wrapper {
+        text-align: center;
+        padding: 20px 0;
+      }
+      .buttons-wrapper {
+        max-width: 200px;
+        display: none;
+        margin: 0 auto;
+        gap: 20px;
+        border-radius: 8px;
+        padding: 20px;
+      }
+      .buttons-wrapper button {
+        padding: 12px 24px;
+        font-size: 1em;
+        z-index: 2;
+        font-weight: 600;
+        color: #fff;
+        transition: all 0.01s ease-in-out;
+        background: linear-gradient(135deg, #ff8c00 0%, #ff6347 100%);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+      }
+      .buttons-wrapper button:hover {
+        background: linear-gradient(135deg, #ff6347 0%, #ffb74d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      }
+      .buttons-wrapper button:active {
+        background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+        transform: translateY(0);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+      }
+      .subtitle-wrapper {
+        text-align: center;
+      }
+      .subtitle-wrapper h1 {
+        text-transform: capitalize;
+        display: inline;
+      }
+      .time {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+        width: 100%;
+      }
+      .time > div {
+        display: flex;
+        gap: 5px;
+        align-items: flex-start;
+      }
+      .time > div label {
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .time-header {
+        color: white;
+      }
+      .invalid {
+        display: none;
+      }
+      .invalid-winner-list {
+        padding: 0;
+      }
+      #control-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 190px;
+  margin-left: 11%; /* move buttons 80% to the right */
+}
+
+#pause-button,
+#resume-button,
+#restart-button {
+    padding: 7px 20px; /* Existing padding */
+    font-size: 2em; /* Existing font size */
+    color: #310a0a; /* Existing text color */
+    background: linear-gradient(135deg, #ff8c00 0%, #ff6347 100%); /* Existing background */
+    border: none; /* Existing border */
+    border-radius: 6px; /* Existing border radius */
+    cursor: pointer; /* Existing cursor */
+    text-align: center; /* Existing text alignment */
+    transition: all 0.01s ease; /* Existing transition */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8); /* Existing shadow */
+    margin-bottom: 10px; /* Existing margin */
+    position: relative; /* Enable positioning */
+    left: -400px; /* Move the button 50px from its original position */
+}
+      #pause-button:hover,
+      #resume-button:hover,
+      #restart-button:hover {
+        background: linear-gradient(135deg, #ff6347 0%, #ffb74d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      }
+      #pause-button:active,
+      #resume-button:active,
+      #restart-button:active {
+        background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+        transform: translateY(0);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+      }
+      #pause-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3em;
+        color: white;
+        z-index: 1001;
+        display: none;
+      }
+      #pause-label.show {
+        display: block;
+      }
+      #congrats-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 5em;
+        color: yellow;
+        text-shadow: 2px 2px 4px #000000;
+        z-index: 1002;
+        display: none;
+      }
+      #congrats-message.show {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="index">
+      <div class="spinner">
+        <div>
+          <img src="https://res.cloudinary.com/dqdtnitie/image/upload/v1728381674/Spinner_2_eq6did.gif" alt="" />
+        </div>
+        <div>Loading names, Please wait...</div>
+      </div>
+      <h1 contenteditable="false" class="header" style="margin-left: -20px;">
+        BRGY. JUDICIARY POBLACION<br />
+        MONTHLY MEET-UP
+      </h1>
+      <div id="name-container">
+      </div>
+      </div>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+      <div id="header-container">
+        <button id="settings-button">
+          <i class="fas fa-cog"></i> <!-- Font Awesome settings icon -->
+        </button>
+      </div>
+      <div class="pick-button-wrapper">
+        <button id="pick-button1">Draw</button>
+      <div id="winner-container">
+        <h2><span id="winner-text"></span></h2>
+    </div>
+    </div>
+    </div>
+      </div>
+      <div id="pause-label"></div>
+      <div id="congrats-message"></div>
+      <div id="control-buttons">
+        <button id="pause-button"></button>
+        <button id="resume-button"></button>
+        <button id="restart-button"></button>
+      <div class="settings-container">
+        <h2 class="settings-header">SETTINGS</h2>
+        <div>
+          <label for="edit-title-button">Edit title:</label>
+          <input type="text" required="true" id="edit-title-button" value="Edit Title" />
+        </div>
+        <div>
+          <div>
+            <label for="name-input">Enter First Name and Last Name:</label>
+            <div>
+              <textarea id="name-input" placeholder="Insert Name Here">WENNY
+                ALBERTO
+                NHOEL
+                NESTOR
+                ALDRIN
+                K. ADING
+                K. REY
+                K. JL 
+                K. ARIEL
+                RUBEN
+                KAP B.
+                MAXIMA
+                VICKY
+          </textarea>
+            </div>
+            <button id="add-name-button">Add Name</button>
+          </div>
+        <div>
+          <label for="input">Upload Excel or CSV File:</label>
+          <input type="file" id="input" accept=".txt, .xlsx, .xls, .csv" required="true" />
+          <input type="file" id="file-upload-names" accept=".txt, .xlsx, .xls, .csv" required="true" />
+        </div>
+        <div>
+          <label for="shape-select">Select Name Container Shape:</label>
+          <select id="shape-select">
+            <option value="rectangle">Rectangle</option>
+            <option value="circle">Circle</option>
+            <option value="rounded">Rounded Rectangle</option>
+          </select>
+        </div>
+        <div>
+          <label>Time In:</label>
+          <div class="time">
+            <div class="time-wrapper">
+              <input type="radio" name="time" id="radio-input" checked value="minutes" />
+              <div>
+                <div><label for="time-input">Mins</label></div>
+                <input type="number" id="time-input" value="1" min="1" max="15" />
+              </div>
+            </div>
+            <div class="time-wrapper">
+              <input type="radio" name="time" value="seconds" />
+              <div>
+                <div><label for="time-input-seconds">Secs</label></div>
+                <input type="number" id="seconds-input" value="30" min="30" max="900" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button id="pick-button"></button>
+      <audio id="drum-roll" src="https://free-sound-effects.net/mp3/03/free-sound-1674970809.mp3"></audio>
+      <audio id="winner-sound" src="https://www.fesliyanstudios.com/play-mp3/6778"></audio>
+    </section>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const settingsButton = document.getElementById("settings-button");
+        const radioInput = document.querySelector("#radio-input");
+        const secondsInput = document.querySelector("#seconds-input");
+        const settingsContainer = document.querySelector(".settings-container");
+        const shapeSelect = document.getElementById("shape-select");
+        const nameContainer = document.getElementById("name-container");
+        const nameInput = document.getElementById("name-input");
+        const spinner = document.querySelector(".spinner");
+        const addNameButton = document.getElementById("add-name-button");
+        const timeInput = document.getElementById("time-input");
+        const pickButton1 = document.getElementById("pick-button1");
+        const drumRoll = document.getElementById("drum-roll");
+        const winnerSound = document.getElementById("winner-sound");
+        const fileUploadNames = document.getElementById("file-upload-names");
+        const excelInput = document.getElementById("input");
+        const winnerText = document.getElementById("winner-text");
+        const header = document.querySelector(".header");
+        const pauseButton = document.getElementById("pause-button");
+        const resumeButton = document.getElementById("resume-button");
+        const restartButton = document.getElementById("restart-button");
+        const pauseLabel = document.getElementById("pause-label");
+        const congratsMessage = document.getElementById("congrats-message");
+        let originalNamesList = [];
+        let confettiInterval;
+    
+        let drawingInProgress = false;
+        let currentShape = "rectangle";
+        let winnersList = [];
+        let currentWinnerNames = "";
+        let countdownInterval;
+        let drawInterval;
+        let isPaused = false;
+        let remainingTime = 0;
+    
+        settingsButton.addEventListener("click", () => {
+          settingsContainer.classList.toggle("show");
+        });
+    
+        const updateHeader = () => {
+          const newTitle = document.getElementById("edit-title-button").value.trim();
+          header.textContent = newTitle || "Ultrapak E-Raffle Duo Promo";
+        };
+    
+        document.getElementById("edit-title-button").addEventListener("change", (event) => {
+          updateHeader();
+          event.preventDefault();
+          event.target.blur();
+        });
+    
+        shapeSelect.addEventListener("change", (event) => {
+          currentShape = event.target.value;
+          updateNameContainerShapes();
+        });
+    
+        function updateNameContainerShapes() {
+          const nameElements = document.querySelectorAll(".name");
+          nameElements.forEach((name) => {
+            name.className = `name ${currentShape}`;
+          });
+        }
+    
+        addNameButton.addEventListener("click", addName);
+        let names = [];
+    
+        function addName() {
+          namedrawn = false;
+          nameIndex = 0;
+          excelInput.value = "";
+          nameContainer.innerHTML = "";
+          const namesInput = nameInput.value.trim();
+          if (namesInput) {
+            let namesArray = namesInput.split("\n").map((name) => name.trim()).filter((n) => n !== "");
+            names = namesArray;
+            addNames(names);
+            nameInput.value = "";
+            nameContainer.style.display = "grid";
+            spinner.style.display = "none";
+          } else {
+            alert("Names cannot be empty");
+          }
+        }
+    
+        const shuffleNames = (names) => {
+          const namesArray = Array.from(names);
+          for (let i = namesArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [namesArray[i], namesArray[j]] = [namesArray[j], namesArray[i]];
+          }
+          return namesArray;
+        };
+    
+        excelInput.addEventListener("change", (event) => {
+          const file = event.target.files[0];
+          currentIndex = 0;
+          namedrawn = false;
+          nameIndex = 0;
+          nameContainer.innerHTML = "";
+          names = [];
+          if (file) {
+            if (file.name.endsWith(".csv")) {
+              parseCSV(file);
+              nameContainer.style.display = "grid";
+            } else {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array", cellDates: true, cellText: false });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: false });
+                for (let row of rows) {
+                  for (let cell of row) {
+                    if (typeof cell === "string" && cell.trim() !== "") {
+                      names.push(cell);
+                    }
+                  }
+                }
+                addNames(names);
+                nameContainer.style.display = "grid";
+              };
+              reader.readAsArrayBuffer(file);
+            }
+          }
+          spinner.style.display = "none";
+        });
+    
+        function parseCSV(file) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const text = event.target.result;
+            const namesArr = text.split("\n").map((name) => name.trim()).filter((n) => n !== "");
+            addNames(namesArr);
+          };
+          reader.readAsText(file);
+        }
+    
+        const batchSize = 1000;
+        let namesList = [];
+        let currentIndex = 0;
+    
+        function addNames(names) {
+          if (currentIndex >= names.length) {
+            return;
+          }
+          const nextItems = names.slice(currentIndex, currentIndex + batchSize);
+          const fragment = document.createDocumentFragment();
+          nextItems.forEach((item) => {
+            let nameElement = document.createElement("div");
+            nameElement.className = `name ${currentShape}`;
+            const parts = item.split(/\s+/).map((part) => part.trim());
+            let innerHTML = "";
+            if (parts.length === 1) {
+              innerHTML = `<div class="name-row">${parts[0]}</div>`;
+            } else if (parts.length === 2) {
+              innerHTML = `<div class="name-row">${parts[0]}</div><div class="name-row">${parts[1]}</div>`;
+            } else if (parts.length === 3) {
+              innerHTML = `<div class="name-row">${parts[0]} ${parts[1]}</div><div class="name-row">${parts[2]}</div>`;
+            } else if (parts.length >= 4) {
+              const topRow = `${parts[0]} ${parts[1]}`;
+              const remainingParts = parts.slice(2);
+              let remainingRows = [];
+              for (let i = 0; i < remainingParts.length; i += 2) {
+                const row = remainingParts.slice(i, i + 2).join(" ");
+                remainingRows.push(`<div class="name-row">${row}</div>`);
+              }
+              innerHTML = `<div class="name-row">${topRow}</div>${remainingRows.join("")}`;
+            }
+            nameElement.innerHTML = innerHTML;
+            fragment.appendChild(nameElement);
+          });
+          nameContainer.appendChild(fragment);
+          currentIndex += batchSize;
+          namesList = Array.from(document.querySelectorAll(".name"));
+        }
+        function displayWinner(nameParts, fullName) {
+          let nameRowsHTML = "";
+          if (nameParts.length === 2) {
+            nameRowsHTML = `<div class="namerows">${nameParts[0]}</div><div class="namerows">${nameParts[1]}</div>`;
+          } else {
+            for (let i = 0; i < nameParts.length; i++) {
+              nameRowsHTML += `<div class="namerows">${nameParts[i]}</div>`;
+            }
+          }
+          winnerText.innerHTML = nameRowsHTML;
+          buttonWrapper.style.display = "flex";
+          winnersList.push(fullName);
+        }
+    
+        const style = document.createElement("style");
+        style.innerHTML = `
+          .roll-up {
+              opacity: 0;
+              transform: translateY(20px);
+              animation: rollUp 15s ease-in-out infinite;
+          }
+          @keyframes rollUp {
+              0% {
+                  opacity: 0;
+                  transform: translateY(20px);
+              }
+              50% {
+                  opacity: 1;
+                  transform: translateY(0);
+              }
+              100% {
+                  opacity: 0;
+                  transform: translateY(20px);
+              }
+          }
+        `;
+        document.head.appendChild(style);
+    
+        let namedrawn = false;
+        let nameIndex = 0;
+    
+    
+        // Modified draw animation: Use slower uniform random shuffle selection with enhanced bouncing highlight
+        pickButton1.addEventListener("click", () => {
+          const displayStyle = window.getComputedStyle(buttonWrapper).display;
+          if (displayStyle !== "none") {
+            alert("Choose valid or invalid before the next draw.");
+            return;
+          }
+          if (namedrawn) {
+            namesList[nameIndex].remove();
+            namesList.splice(nameIndex, 1);
+            namedrawn = false;
+            nameIndex = 0;
+          }
+          drawingInProgress = true;
+          const drawTime = radioInput.checked 
+            ? parseInt(timeInput.value) * 60 * 1000 
+            : parseInt(secondsInput.value) * 1000;
+          settingsContainer.classList.remove("show");
+          if (namesList.length > 0) {
+            let countdown = 3;
+            let countdownElement = document.getElementById("countdown");
+            if (!countdownElement) {
+              const countdownElement = document.createElement("div");
+countdownElement.id = "countdown";
+countdownElement.style.fontSize = "3em";
+countdownElement.style.color = "red";
+countdownElement.style.textAlign = "center";
+countdownElement.style.position = "fixed";
+countdownElement.style.top = "50%";
+countdownElement.style.left = "50%";
+countdownElement.style.transform = "translate(-50%, -50%)";
+countdownElement.style.zIndex = "1000";
+// Removed background color
+// countdownElement.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+countdownElement.style.padding = "20px";
+countdownElement.style.borderRadius = "10px";
+              document.body.appendChild(countdownElement);
+            }
+            countdownElement.textContent = ` ${countdown} `;
+            const countdownInterval = setInterval(() => {
+              countdown--;
+              countdownElement.textContent = `Drawing in ${countdown} seconds...`;
+              if (countdown === 0) {
+                clearInterval(countdownInterval);
+                countdownElement.remove();
+                // Random shuffle highlight selection with enhanced bouncing highlight at 300ms interval.
+                const highlightInterval = setInterval(() => {
+                  const total = namesList.length;
+                  const randomIndex = Math.floor(Math.random() * total);
+                  namesList.forEach((name) => name.classList.remove("highlight"));
+                  namesList[randomIndex].classList.add("highlight");
+                  namesList[randomIndex].scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+                  winnerText.innerHTML = namesList[randomIndex].innerHTML;
+                  nameIndex = randomIndex;
+                }, 300);
+                setTimeout(() => {
+                  clearInterval(highlightInterval);
+                  drumRoll.loop = false;
+                  drumRoll.pause();
+                  winnerSound.play();
+                  namesList.forEach((name) => name.classList.remove("highlight"));
+                  const winnerName = namesList[nameIndex];
+                  const nameRows = winnerName.querySelectorAll(".name-row");
+                  let nameParts = [];
+                  nameRows.forEach((nameRow) => {
+                    nameParts.push(nameRow.textContent.trim());
+                  });
+                  winnerName.classList.add("highlight");
+                  winnerName.style.fontSize = "1.2em";
+                  displayWinner(nameParts, nameParts.join(" "));
+                  currentWinnerNames = nameParts.join(" ");
+                  namedrawn = true;
+                  drawingInProgress = false;
+                  confetti({
+                    particleCount: 300,
+                    spread: 70,
+                    origin: { y: 0.8 },
+                  });
+                }, drawTime);
+              }
+            }, 1000);
+          } else {
+            alert("No names added");
+            drawingInProgress = false;
+          }
+        });
+    
+        const confettiContainer = document.createElement("div");
+        confettiContainer.id = "confetti-container";
+        document.body.appendChild(confettiContainer);
+        function createConfetti() {
+          const confetti = document.createElement("div");
+          confetti.classList.add("confetti");
+          confetti.style.left = `${Math.random() * 100}%`;
+          confetti.style.top = `${Math.random() * 100}%`;
+          confetti.style.animationDuration = `${Math.random() * 2 + 1}s`;
+          confettiContainer.appendChild(confetti);
+        }
+        for (let i = 0; i < 200; i++) {
+          createConfetti();
+        }
+        setTimeout(() => {
+          confettiContainer.remove();
+        }, 5000);
+        fileUploadNames.addEventListener("change", (event) => {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, { type: "array" });
+              const sheetName = workbook.SheetNames[0];
+              const worksheet = workbook.Sheets[sheetName];
+              const fileNames = XLSX.utils.sheet_to_json(worksheet);
+              fileNames.forEach((name) => {
+                const firstName = name["First Name"];
+                const lastName = name["Last Name"];
+                const nameElement = document.createElement("div");
+                nameElement.className = "name";
+                nameElement.textContent = `${firstName} ${lastName}`;
+                nameContainer.appendChild(nameElement);
+              });
+              nameContainer.style.display = "grid";
+            };
+            reader.readAsArrayBuffer(file);
+          }
+        });
+        function startAutomaticDrawing() {
+  // Check if there are enough names to draw
+  if (namesList.length === 0) {
+    alert("No names to draw.");
+    return;
+  } else if (namesList.length === 1) {
+    // If there's only one name, declare it as the winner immediately
+    const lastWinner = namesList[0];
+    winnerText.innerHTML = lastWinner.innerHTML;
+    confetti({
+      particleCount: 300,
+      spread: 70,
+      origin: { y: 0.8 },
+    });
+    return;
+  }
+  
+
+  // Start the drawing process if there are more than one name
+  const drawInterval = setInterval(() => {
+    if (namesList.length === 1) {
+      // If there's only one name left, declare it as the winner
+      clearInterval(drawInterval);
+      const lastWinner = namesList[0];
+      winnerText.innerHTML = lastWinner.innerHTML;
+      confetti({
+        particleCount: 300,
+        spread: 70,
+        origin: { y: 0.8 },
+      });
+      return;
+    }
+
+    // Randomly select a name
+    const randomIndex = Math.floor(Math.random() * namesList.length);
+    const winnerName = namesList[randomIndex];
+    winnerName.classList.add("highlight");
+    winnerText.innerHTML = winnerName.innerHTML;
+
+    // Remove the drawn name from the list
+    namesList.splice(randomIndex, 1);
+    winnerName.remove();
+
+    // Wait for 5 seconds before the next draw
+  }, 30000); // 30000 milliseconds = 30 seconds
+}
+
+// Call this function to start automatic drawing
+startAutomaticDrawing();
+        
+
+
+        function drawName() {
+          if (namesList.length <= 1) {
+            clearInterval(drawInterval);
+            drawingInProgress = false;
+            return;
+          }
+          const total = namesList.length;
+          const randomIndex = Math.floor(Math.random() * total);
+          namesList.forEach((name) => name.classList.remove("highlight"));
+          namesList[randomIndex].classList.add("highlight");
+          namesList[randomIndex].scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+          winnerText.innerHTML = namesList[randomIndex].innerHTML;
+          nameIndex = randomIndex;
+          setTimeout(() => {
+            namesList[nameIndex].remove();
+            namesList.splice(nameIndex, 1);
+            if (namesList.length === 1) {
+              clearInterval(drawInterval);
+              winnerText.innerHTML = namesList[0].innerHTML;
+              confetti({
+                particleCount: 300,
+                spread: 70,
+                origin: { y: 0.8 },
+              });
+              drawingInProgress = false;
+            }
+          }, 10000);
+        }
+    
+        pauseButton.addEventListener("click", () => {
+          isPaused = true;
+          clearInterval(drawInterval);
+          pauseLabel.classList.add("show");
+        });
+    
+        resumeButton.addEventListener("click", () => {
+          isPaused = false;
+          pauseLabel.classList.remove("show");
+          displayCountdown(3, () => {
+            startDrawing();
+          });
+        });
+    
+        restartButton.addEventListener("click", () => {
+          clearInterval(drawInterval);
+          stopConfetti();
+          congratsMessage.classList.remove("show");
+          nameContainer.innerHTML = "";
+          namesList = [...originalNamesList];
+          namesList.forEach((name) => nameContainer.appendChild(name));
+          startDrawing();
+        });
+    
+        pickButton1.addEventListener("click", () => {
+  if (drawingInProgress) {
+    alert("A draw is already in progress.");
+    return;
+  }
+
+  if (namesList.length === 0) {
+    alert("No names added");
+    return;
+  }
+
+  drawingInProgress = true;
+  let countdown = 3; // Countdown duration in seconds
+  const countdownElement = document.createElement("div");
+  countdownElement.id = "countdown";
+  countdownElement.style.fontSize = "3em";
+  countdownElement.style.color = "red";
+  countdownElement.style.textAlign = "center";
+  countdownElement.style.position = "fixed";
+  countdownElement.style.top = "50%";
+  countdownElement.style.left = "50%";
+  countdownElement.style.transform = "translate(-50%, -50%)";
+  countdownElement.style.zIndex = "1000";
+  countdownElement.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+  countdownElement.style.padding = "20px";
+  countdownElement.style.borderRadius = "10px";
+  document.body.appendChild(countdownElement);
+
+  // Hide the settings button during countdown
+  settingsButton.style.display = "none";
+
+  const countdownInterval = setInterval(() => {
+    countdownElement.textContent = ` ${countdown}`;
+    countdown--;
+    if (countdown < 0) {
+      clearInterval(countdownInterval);
+      countdownElement.remove();
+      // Show the settings button again after countdown
+      settingsButton.style.display = "block";
+      startHighlighting();
+    }
+  }, 1000);
+});
+const heartbeatSound = document.getElementById("heartbeat-sound");
+
+// Function to play heartbeat sound
+function playHeartbeat() {
+    heartbeatSound.currentTime = 0; // Reset sound to start
+    heartbeatSound.volume = 0.5; // Set volume to maximum
+    heartbeatSound.loop = true; // Loop the heartbeat sound
+    heartbeatSound.play();
+}
+
+function stopHeartbeat() {
+    heartbeatSound.pause();
+    heartbeatSound.currentTime = 0; // Reset sound to start
+}
+
+// Modify the countdown function to play heartbeat sound
+function startHighlighting() {
+    const highlightInterval = setInterval(() => {
+        const total = namesList.length;
+        const randomIndex = Math.floor(Math.random() * total);
+        namesList.forEach(name => name.classList.remove("highlight"));
+        namesList[randomIndex].classList.add("highlight");
+        winnerText.innerHTML = namesList[randomIndex].innerHTML; // Display highlighted name
+    }, 300); // Change this value to adjust how often the highlight changes
+
+    let countdown = 45; // Countdown duration in seconds (1 minute)
+    const countdownElement = document.createElement("div");
+    countdownElement.id = "countdown"; // Use the same ID for styling
+    countdownElement.textContent = ` ${countdown}`; // Initial text
+    document.body.appendChild(countdownElement); // Append to body
+
+    // Start playing the heartbeat sound
+    playHeartbeat();
+
+    // Apply the heartbeat effect continuously to the text
+    winnerText.classList.add("heartbeat");
+
+    // Apply the screen beating effect
+    document.body.classList.add("screen-beat");
+
+    const countdownInterval = setInterval(() => {
+        countdownElement.textContent = ` ${countdown} `;
+        
+        // Intensify the heartbeat effect as the countdown approaches zero
+        if (countdown <= 30) { // Start intensifying the effect when there are 30 seconds left
+            winnerText.style.animationDuration = countdown <= 5 ? "0.2s" : "0.3s"; // Speed up the heartbeat as it gets closer to zero
+            heartbeatSound.volume = Math.min(1, heartbeatSound.volume + 0.1); // Increase volume
+        }
+
+        countdown--;
+        if (countdown < 0) {
+            clearInterval(countdownInterval);
+            countdownElement.remove();
+            clearInterval(highlightInterval);
+            stopHeartbeat(); // Stop the heartbeat sound
+            document.body.classList.remove("screen-beat"); // Remove the beating effect when done
+            selectWinner();
+        }
+    }, 1000);
+}
+
+// Modify the selectWinner function to add celebration effect
+function selectWinner() {
+    const total = namesList.length;
+    const randomIndex = Math.floor(Math.random() * total);
+    const winnerName = namesList[randomIndex];
+
+    // Clear previous highlights
+    namesList.forEach(name => name.classList.remove("highlight"));
+
+    // Highlight the winner's name in the winner container
+    winnerText.innerHTML = winnerName.innerHTML; // Display winner's name
+    winnerName.classList.add("highlight"); // Add highlight class to the winner's name
+    winnerName.classList.add("winner-effect"); // Add winner effect class
+    winnerName.classList.add("celebrate"); // Add celebration effect class
+
+    // Play winner sound
+    winnerSound.play();
+
+    // Remove the winner from the list
+    winnerName.remove();
+    namesList.splice(randomIndex, 1);
+    drawingInProgress = false;
+}
+      });
+    </script>
+    <!-- The enhanced bouncing highlight effect applies via CSS keyframes defined above -->
+  </body>
+</html>
